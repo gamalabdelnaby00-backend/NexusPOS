@@ -1,0 +1,8 @@
+<Solution>
+  <Project Path="UniversalPOS.Api/UniversalPOS.Api.csproj" />
+  <Project Path="UniversalPOS.Application/UniversalPOS.Application.csproj" />
+  <Project Path="UniversalPOS.Desktop/UniversalPOS.Desktop.csproj" />
+  <Project Path="UniversalPOS.Domain/UniversalPOS.Domain.csproj" />
+  <Project Path="UniversalPOS.Infrastructure/UniversalPOS.Infrastructure.csproj" />
+  <Project Path="UniversalPOS.Tests/UniversalPOS.Tests.csproj" />
+</Solution>

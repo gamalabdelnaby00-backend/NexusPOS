@@ -1,0 +1,2 @@
+﻿namespace UniversalPOS.Domain.Entities;
+public class RolePermission { public int RoleId {get; private set;} public Role? Role {get; private set;} public int PermissionId {get; private set;} public Permission? Permission {get; private set;} private RolePermission(){} public RolePermission(int roleId,int permissionId){if(roleId<=0||permissionId<=0)throw new ArgumentOutOfRangeException("IDs must be positive.");RoleId=roleId;PermissionId=permissionId;} }

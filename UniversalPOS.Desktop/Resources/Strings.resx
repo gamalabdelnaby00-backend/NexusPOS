@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="LoginTitle" xml:space="preserve"><value>UniversalPOS - Login</value></data>
+  <data name="SignInSubtitle" xml:space="preserve"><value>Sign in to continue</value></data>
+  <data name="Username" xml:space="preserve"><value>Username</value></data>
+  <data name="Password" xml:space="preserve"><value>Password</value></data>
+  <data name="Login" xml:space="preserve"><value>Login</value></data>
+  <data name="Language" xml:space="preserve"><value>Language</value></data>
+  <data name="InvalidCredentials" xml:space="preserve"><value>Invalid username or password, or account is inactive.</value></data>
+  <data name="UnsupportedRole" xml:space="preserve"><value>Your account has no supported application role.</value></data>
+  <data name="English" xml:space="preserve"><value>English</value></data>
+  <data name="Arabic" xml:space="preserve"><value>العربية</value></data>
+  <data name="ShiftRequired" xml:space="preserve"><value>Please sign in and open a cash shift before starting a sale.</value></data>
+  <data name="ShiftNotOwned" xml:space="preserve"><value>This cash shift belongs to another user. Open your own shift to continue.</value></data>
+  <data name="InsufficientStock" xml:space="preserve"><value>The available quantity is not enough to complete the sale.</value></data>
+  <data name="PermissionDenied" xml:space="preserve"><value>You do not have permission to perform this action.</value></data>
+  <data name="SaveFailed" xml:space="preserve"><value>Could not save the data. Please try again.</value></data>
+  <data name="OpenShiftNow" xml:space="preserve"><value>You have no open cash shift. Do you want to open one now?</value></data>
+  <data name="OpenShiftTitle" xml:space="preserve"><value>Open cash shift</value></data>
+  <data name="OpeningFloatPrompt" xml:space="preserve"><value>Enter the opening cash amount:</value></data>
+  <data name="OpeningFloatInvalid" xml:space="preserve"><value>Enter a valid opening amount (zero or greater).</value></data>
+  <data name="TerminalMissing" xml:space="preserve"><value>The cash terminal was not found or is inactive.</value></data>
+  <data name="CloseShiftTitle" xml:space="preserve"><value>Close cash shift</value></data>
+  <data name="CloseShiftPrompt" xml:space="preserve"><value>You still have an open shift. Close it now?</value></data>
+  <data name="ExpectedCash" xml:space="preserve"><value>Expected cash in drawer</value></data>
+  <data name="CountedCash" xml:space="preserve"><value>Counted cash</value></data>
+  <data name="Notes" xml:space="preserve"><value>Notes</value></data>
+  <data name="CloseShift" xml:space="preserve"><value>Close shift</value></data>
+  <data name="Cancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="ShiftClosedOk" xml:space="preserve"><value>The shift was closed successfully.</value></data>
+  <data name="ShiftClosedDiff" xml:space="preserve"><value>The shift was closed with a cash difference and is waiting for approval.</value></data>
+  <data name="CashDifference" xml:space="preserve"><value>Difference</value></data>
+</root>

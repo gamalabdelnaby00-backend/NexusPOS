@@ -1,0 +1,292 @@
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace UniversalPOS.Domain.Entities
+{
+    public class Category
+    {
+        public int Id { get; private set; }
+        public string Name { get; private set; } = string.Empty;
+        public bool IsActive { get; private set; }
+        public Category(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentException("Category name cannot be empty.");
+            Name = name;
+            IsActive = true;
+        }
+        public void Deactivate()
+        {
+            IsActive = false;
+        }
+
+        public void Activate()
+        {
+            IsActive = true;
+        }
+    }
+}
+
+namespace UniversalPOS.Domain.Entities
+{
+    public class Product
+    {
+        public int Id { get; private set; }
+
+        public string Name { get; private set; } = string.Empty;
+
+        public decimal Price { get; private set; }
+
+        public string Barcode { get; private set; } = string.Empty;
+
+        public int CategoryId { get; private set; }
+
+        public bool IsActive { get; private set; }
+
+        public Product(string name,decimal price,string barcode,int categoryId)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentException("Product name cannot be empty.");
+
+            if (price < 0)
+                throw new ArgumentException("Price cannot be negative.");
+
+            if (string.IsNullOrWhiteSpace(barcode))
+                throw new ArgumentException("Barcode cannot be empty.");
+
+            if (categoryId <= 0)
+                throw new ArgumentException("Invalid category ID.");
+
+            Name = name;
+            Price = price;
+            Barcode = barcode;
+            CategoryId = categoryId;
+            IsActive = true;
+        }
+
+        public void ChangePrice(decimal newPrice)
+        {
+            if (newPrice < 0)
+                throw new ArgumentException("Price cannot be negative.");
+
+            Price = newPrice;
+        }
+
+        public void Deactivate()
+        {
+            IsActive = false;
+        }
+
+        public void Activate()
+        {
+            IsActive = true;
+        }
+    }
+}
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using UniversalPOS.Domain.Enums;
+
+namespace UniversalPOS.Domain.Entities
+{
+    public class Sale
+    {
+        private readonly List<SaleItem> _items = new();
+        private readonly List<Payment> _payments = new();
+        public int Id { get; private set; }
+        public DateTime SaleDate { get; private set; }
+        public decimal TotalAmount => _items.Sum(item => item.TotalPrice);
+        public IReadOnlyCollection<SaleItem> Items => _items.AsReadOnly();
+        public IReadOnlyCollection<Payment> Payments => _payments.AsReadOnly();
+        public decimal PaidAmount => _payments.Sum(payment => payment.Amount);
+        public PaymentStatus PaymentStatus { get; private set; }
+        public SaleStatus Status { get; private set; }
+        public Sale()
+        {
+            SaleDate = DateTime.Now;
+            Status = SaleStatus.Draft;
+            PaymentStatus = PaymentStatus.Unpaid;
+        }
+        public void AddItem(SaleItem item)
+        {
+            if (Status != SaleStatus.Draft)
+                throw new InvalidOperationException("Cannot modify a sale that is not in Draft status.");
+
+            if (item is null)
+                throw new ArgumentNullException(nameof(item));
+
+            if (_items.Contains(item))
+                throw new InvalidOperationException("This item has already been added to the sale.");
+
+            _items.Add(item);
+        }
+        public void Complete()
+        {
+            if (Status != SaleStatus.Draft)
+                throw new InvalidOperationException("Only draft sales can be completed.");
+
+            if (_items.Count == 0)
+                throw new InvalidOperationException("Cannot complete a sale without items.");
+
+            Status = SaleStatus.Completed;
+        }
+        public void Cancel()
+        {
+            if (Status != SaleStatus.Draft)
+                throw new InvalidOperationException("Only draft sales can be cancelled.");
+
+            Status = SaleStatus.Cancelled;
+        }
+        public void ChangeItemQuantity(SaleItem item, int newQuantity)
+        {
+            if (Status != SaleStatus.Draft)
+                throw new InvalidOperationException("Cannot modify a sale that is not in Draft status.");
+
+            if (item is null)
+                throw new ArgumentNullException(nameof(item));
+
+            if (!_items.Contains(item))
+                throw new InvalidOperationException("This item does not belong to this sale.");
+
+            item.ChangeQuantity(newQuantity);
+        }
+
+        public void AddProduct(Product product, int quantity = 1)
+        {
+            if (Status != SaleStatus.Draft)
+                throw new InvalidOperationException("Cannot modify a sale that is not in Draft status.");
+
+            if (product is null)
+                throw new ArgumentNullException(nameof(product));
+
+            if (!product.IsActive)
+                throw new InvalidOperationException("Cannot sell an inactive product.");
+
+            if (quantity <= 0)
+                throw new ArgumentException("Quantity must be greater than zero.");
+
+            SaleItem? existingItem = _items.FirstOrDefault(item => item.ProductId == product.Id);
+
+            if (existingItem is not null)
+            {
+                existingItem.ChangeQuantity(existingItem.Quantity + quantity);
+                existingItem.ChangeUnitPrice(product.Price);
+                return;
+            }
+
+            SaleItem newItem = new SaleItem(product.Id,product.Price,quantity);
+
+            _items.Add(newItem);
+        }
+        public void AddPayment(Payment payment)
+        {
+            if (Status != SaleStatus.Draft)
+                throw new InvalidOperationException("Cannot add payment to a sale that is not in Draft status.");
+
+            if (payment is null)
+                throw new ArgumentNullException(nameof(payment));
+
+            if (_items.Count == 0)
+                throw new InvalidOperationException("Cannot add payment to a sale without items.");
+
+            if (PaidAmount + payment.Amount > TotalAmount)
+                throw new InvalidOperationException("Payment amount exceeds the remaining balance.");
+
+            _payments.Add(payment);
+
+            UpdatePaymentStatus();
+        }
+        private void UpdatePaymentStatus()
+        {
+            if (PaidAmount == 0)
+                PaymentStatus = PaymentStatus.Unpaid;
+            else if (PaidAmount < TotalAmount)
+                PaymentStatus = PaymentStatus.PartiallyPaid;
+            else
+                PaymentStatus = PaymentStatus.Paid;
+        }
+    }
+}
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace UniversalPOS.Domain.Entities
+{
+    public class SaleItem
+    {
+        public int Id { get; private set; }
+
+        public int ProductId { get; private set; }
+
+        public decimal UnitPrice { get; private set; }
+
+        public int Quantity { get; private set; }
+
+        public decimal TotalPrice => UnitPrice * Quantity;
+
+        public SaleItem(int productId, decimal unitPrice, int quantity)
+        {
+            if (productId <= 0)
+                throw new ArgumentOutOfRangeException(nameof(productId), "Invalid product ID.");
+
+            ProductId = productId;
+
+            if (unitPrice < 0)
+                throw new ArgumentOutOfRangeException(nameof(unitPrice), "Unit price cannot be negative.");
+
+            UnitPrice = unitPrice;
+
+            if (quantity <= 0)
+                throw new ArgumentOutOfRangeException(nameof(quantity), "Quantity must be greater than zero.");
+
+            Quantity = quantity;
+        }
+
+        internal void ChangeQuantity(int newQuantity)
+        {
+            if (newQuantity <= 0)
+                throw new ArgumentOutOfRangeException(nameof(newQuantity), "Quantity must be greater than zero.");
+
+            Quantity = newQuantity;
+        }
+
+        public void ChangeUnitPrice(decimal newPrice)
+        {
+            if (newPrice < 0)
+                throw new ArgumentException(nameof(newPrice), "Unit price cannot be negative.");
+
+            UnitPrice = newPrice;
+        }
+    }
+}
+
+using System;
+using System.Collections.Generic;
+using System.Text;
+using UniversalPOS.Domain.Enums;
+
+namespace UniversalPOS.Domain.Entities
+{
+    public class Payment
+    {
+        public int Id { get; private set; }
+        public decimal Amount { get; private set; }
+        public PaymentMethod Method { get; private set; }
+        public Payment(decimal amount, PaymentMethod method)
+        {
+            if (amount <= 0)
+                throw new ArgumentException("Payment amount must be greater than zero.");
+
+            if (!Enum.IsDefined(method))
+                throw new ArgumentException("Invalid payment method.");
+
+            Amount = amount;
+            Method = method;
+        }
+    }
+
+}
