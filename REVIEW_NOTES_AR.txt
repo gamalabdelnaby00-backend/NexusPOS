@@ -1,0 +1,27 @@
+NexusPOS - preliminary performance/security review
+=================================================
+Archive cleanup performed:
+- Removed Visual Studio cache folder(s) (.vs), Git metadata (.git), and any bin/obj build outputs or per-user .user/.suo files from this delivery archive.
+- Application source, project files, migrations, images, tests, and configuration templates were retained.
+
+Findings from source inspection:
+1. Login uses PBKDF2-SHA256 with 600,000 iterations and constant-time hash comparison. This is an intentional security cost; do not lower it casually. A delay around password verification can be expected, but a long freeze usually points to database connection/query latency.
+2. App startup runs InitialDataSeeder before showing the login window. It can query SQL Server several times and may show a warning if seeding cannot reach the database. This is a strong candidate for slow startup / a startup message.
+3. Login queries SQL Server and loads roles/permissions via several EF Core Include paths. Connection/server latency or a slow query may cause the login delay.
+4. appsettings.json has an empty NexusPOS connection string; the app requires a valid connection string in User Secrets. Misconfigured/unreachable SQL Server can cause long waits or the generic login error.
+5. The UI currently catches login exceptions and shows a generic message. The detailed exception is sent to Trace, but no easy user-facing log file is configured in the inspected code, making diagnosis harder.
+
+Security positives:
+- Passwords are hashed, not stored as plaintext, using a random salt and PBKDF2.
+- Login error details are not shown to the user.
+- Connection string is not committed in appsettings.json.
+
+Recommended next changes (not applied in this cleanup-only archive):
+- Measure startup seeding and database login timings, and write rotating diagnostic logs to a protected local folder.
+- Avoid repeatedly running full idempotent seeding at every launch; run it only as a controlled initialization/update step.
+- Inspect SQL Server reachability and indexes before changing password hashing or timeouts.
+- Add lockout/rate limiting for repeated failed sign-ins, and protect remembered username preferences if needed.
+- Review database permissions, backups, secret storage, and tenant isolation before production deployment.
+
+Validation limitation:
+- This environment does not have the .NET SDK installed, so the project could not be compiled or tests executed here.

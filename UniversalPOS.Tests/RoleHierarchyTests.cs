@@ -82,4 +82,37 @@ public class RoleHierarchyTests
     {
         Assert.Equal(StartScreen.None, StartScreenResolver.Resolve(Session(Array.Empty<string>(), Array.Empty<string>())));
     }
+
+    [Fact]
+    public void Admin_CanGrantPermissionToAnyRole()
+    {
+        Assert.True(RoleHierarchy.CanGrantPermission(
+            new[] { "Admin" }, Array.Empty<string>(), "Manager", "Users.Manage"));
+        Assert.True(RoleHierarchy.CanGrantPermission(
+            new[] { "Admin" }, Array.Empty<string>(), "Admin", "Unknown.Permission"));
+    }
+
+    [Fact]
+    public void Manager_CanGrantOnlyPermissionsTheyHoldToLowerRoles()
+    {
+        var roles = new[] { "Manager" };
+        var permissions = new[] { "Products.View", "Inventory.Adjust" };
+
+        Assert.True(RoleHierarchy.CanGrantPermission(roles, permissions, "Cashier", "Products.View"));
+        Assert.False(RoleHierarchy.CanGrantPermission(roles, permissions, "Cashier", "Users.Manage"));
+        Assert.False(RoleHierarchy.CanGrantPermission(roles, permissions, "Manager", "Products.View"));
+        Assert.False(RoleHierarchy.CanGrantPermission(roles, permissions, "Admin", "Products.View"));
+    }
+
+    [Fact]
+    public void PermissionGrantChecks_AreCaseInsensitive_AndRejectBlankInputs()
+    {
+        Assert.True(RoleHierarchy.CanGrantPermission(
+            new[] { "Manager" }, new[] { "products.view" }, "Cashier", "Products.View"));
+        Assert.False(RoleHierarchy.CanGrantPermission(
+            new[] { "Manager" }, new[] { "Products.View" }, " ", "Products.View"));
+        Assert.False(RoleHierarchy.CanGrantPermission(
+            new[] { "Manager" }, new[] { "Products.View" }, "Cashier", " "));
+    }
+
 }

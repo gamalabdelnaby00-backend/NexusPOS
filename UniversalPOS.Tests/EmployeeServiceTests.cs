@@ -26,8 +26,8 @@ public class EmployeeServiceTests
     private static readonly string[] ManagerPermissions = { "Employees.Create", "Users.Create", "Employees.View" };
 
     private static CreateEmployeeRequest Valid(string code = "EMP-001", AccountRequest? account = null) => new(
-        code, "أحمد محمد علي", "Ahmed Mohamed Ali", new DateOnly(1995, 5, 20), "01012345678",
-        "Pharmacist", 1, "بكالوريوس صيدلة", "الإسكندرية", new DateOnly(2024, 1, 1), account);
+        code, "أحمد محمد علي", "01012345678", "ahmed@example.com",
+        "Pharmacist", 1, new DateOnly(2024, 1, 1), null, account);
 
     [Fact]
     public async Task Create_ValidEmployee_IsSavedWithNormalizedCode_AndAudited()
@@ -39,7 +39,8 @@ public class EmployeeServiceTests
         Assert.True(result.Success);
         var employee = Assert.Single(repo.Employees);
         Assert.Equal("EMP-001", employee.Code);
-        Assert.Equal(31, employee.AgeOn(new DateOnly(2026, 10, 27)));   // age is derived, not stored
+        Assert.Equal("أحمد محمد علي", employee.FullName);
+        Assert.Equal("ahmed@example.com", employee.Email);
         Assert.Contains(audit.Entries, e => e.Action == "Employee.Create");
     }
 
@@ -69,37 +70,55 @@ public class EmployeeServiceTests
     }
 
     [Fact]
+    public async Task Create_WithoutCode_GeneratesSequentialCodes()
+    {
+        var (service, repo, _) = Build(new[] { "Manager" }, ManagerPermissions);
+
+        await service.CreateAsync(Valid(""));
+        await service.CreateAsync(Valid(""));
+
+        Assert.Equal(new[] { "EMP-0001", "EMP-0002" }, repo.Employees.Select(e => e.Code).ToArray());
+    }
+
+    [Fact]
     public async Task Create_MissingAndInvalidFields_ReportEachFieldSeparately()
     {
         var (service, repo, _) = Build(new[] { "Manager" }, ManagerPermissions);
-        var bad = new CreateEmployeeRequest("", "أحمد علي", "Ahmed Ali", new DateOnly(2030, 1, 1), "12",
-            "", null, "", "", null, null);
+        var bad = new CreateEmployeeRequest("", "أحمد", "12", "not-an-email", "", null, null, null, null);
 
         var result = await service.CreateAsync(bad);
 
         Assert.False(result.Success);
-        Assert.Equal("Required", result.Errors["Code"]);
-        Assert.Equal("ArabicName3Words", result.Errors["ArabicName"]);
-        Assert.Equal("EnglishName3Words", result.Errors["EnglishName"]);
-        Assert.Equal("FutureDate", result.Errors["BirthDate"]);
+        Assert.Equal("FullNameWords", result.Errors["FullName"]);
         Assert.Equal("InvalidPhone", result.Errors["Phone"]);
+        Assert.Equal("InvalidEmail", result.Errors["Email"]);
         Assert.Equal("Required", result.Errors["JobTitle"]);
         Assert.Equal("Required", result.Errors["BranchId"]);
-        Assert.Equal("Required", result.Errors["Qualification"]);
-        Assert.Equal("Required", result.Errors["Address"]);
         Assert.Equal("Required", result.Errors["HireDate"]);
+        Assert.DoesNotContain("Code", result.Errors.Keys);   // code is generated, not typed
         Assert.Empty(repo.Employees);
     }
 
     [Fact]
-    public async Task Create_ArabicNameWithLatinLetters_IsRejected()
+    public async Task Create_NameWithDigits_IsRejected()
     {
         var (service, _, _) = Build(new[] { "Manager" }, ManagerPermissions);
-        var request = Valid() with { ArabicName = "Ahmed Mohamed Ali" };
+        var request = Valid() with { FullName = "Ahmed 123 Ali" };
 
         var result = await service.CreateAsync(request);
 
-        Assert.Equal("InvalidCharacters", result.Errors["ArabicName"]);
+        Assert.Equal("InvalidCharacters", result.Errors["FullName"]);
+    }
+
+    [Fact]
+    public async Task Create_FutureHireDate_IsRejected()
+    {
+        var (service, _, _) = Build(new[] { "Manager" }, ManagerPermissions);
+        var request = Valid() with { HireDate = new DateOnly(2999, 1, 1) };
+
+        var result = await service.CreateAsync(request);
+
+        Assert.Equal("FutureDate", result.Errors["HireDate"]);
     }
 
     [Fact]

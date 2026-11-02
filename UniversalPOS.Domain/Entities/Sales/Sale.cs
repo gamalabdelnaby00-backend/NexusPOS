@@ -28,7 +28,11 @@ namespace UniversalPOS.Domain.Entities
         public decimal? TaxRate { get; private set; }
         public bool TaxIncluded { get; private set; } = true;
         public decimal TaxableAmount => Math.Max(0m, Subtotal - DiscountAmount);
-        public decimal TaxAmount => TaxRate is null ? 0m : TaxIncluded ? decimal.Round(TaxableAmount - TaxableAmount / (1m + TaxRate.Value / 100m), 2, MidpointRounding.AwayFromZero) : decimal.Round(TaxableAmount * TaxRate.Value / 100m, 2, MidpointRounding.AwayFromZero);
+        public decimal TaxAmount => TaxRate is null
+            ? 0m
+            : TaxIncluded
+                ? decimal.Round(TaxableAmount - TaxableAmount / (1m + TaxRate.Value / 100m), 2, MidpointRounding.AwayFromZero)
+                : decimal.Round(TaxableAmount * TaxRate.Value / 100m, 2, MidpointRounding.AwayFromZero);
         public decimal TotalAmount => TaxableAmount + (TaxRate is not null && !TaxIncluded ? TaxAmount : 0m);
         public IReadOnlyCollection<SaleItem> Items => _items.AsReadOnly();
         public IReadOnlyCollection<Payment> Payments => _payments.AsReadOnly();

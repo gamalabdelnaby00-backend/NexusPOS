@@ -40,6 +40,12 @@ public sealed class ProcessSaleReturnService
         if (!Enum.IsDefined(refundMethod))
             throw new ArgumentException("Invalid refund method.",nameof(refundMethod));
 
+        if (string.IsNullOrWhiteSpace(reason))
+            throw new ArgumentException("Return reason is required.", nameof(reason));
+
+        if (externalReference?.Length > 200)
+            throw new ArgumentException("External refund reference cannot exceed 200 characters.", nameof(externalReference));
+
         if (items.Any(x => x is null))
             throw new ArgumentException("Return items cannot contain null values.",nameof(items));
 
@@ -53,13 +59,6 @@ public sealed class ProcessSaleReturnService
             if (!_currentUser.CashShiftId.HasValue)
                 throw new InvalidOperationException("An active cash shift is required for cash refunds.");
             cashShiftId = _currentUser.CashShiftId.Value;
-
-            var shift = await _returnRepository.GetCashShiftAsync(cashShiftId.Value);
-
-            if (shift is null || shift.Status != CashShiftStatus.Open || shift.UserId != userId)
-            {
-                throw new InvalidOperationException("The current user's cash shift is not open.");
-            }
         }
 
         int returnId = 0;
@@ -73,6 +72,16 @@ public sealed class ProcessSaleReturnService
 
             if (sale.Status != SaleReturnStatus.Completed)
                 throw new InvalidOperationException("Only completed sales can be returned.");
+
+            // Validate the cash shift inside the same serializable transaction as the
+            // refund, inventory restock, and cash-drawer movement. Checking before the
+            // transaction allowed a shift to be closed between validation and refund.
+            if (cashShiftId.HasValue)
+            {
+                var shift = await _returnRepository.GetCashShiftAsync(cashShiftId.Value);
+                if (shift is null || shift.Status != CashShiftStatus.Open || shift.UserId != userId)
+                    throw new InvalidOperationException("The current user's cash shift is not open.");
+            }
 
             var saleItems = sale.Items.ToDictionary(x => x.Id);
 

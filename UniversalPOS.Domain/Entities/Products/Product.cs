@@ -65,6 +65,32 @@ namespace UniversalPOS.Domain.Entities
             ImageKey = string.IsNullOrWhiteSpace(imageKey) ? null : imageKey.Trim();
         }
 
+        public void ChangeName(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentException("Product name cannot be empty.", nameof(name));
+            Name = name.Trim();
+        }
+
+        public void ChangeBarcode(string barcode)
+        {
+            if (string.IsNullOrWhiteSpace(barcode))
+                throw new ArgumentException("Barcode cannot be empty.", nameof(barcode));
+            Barcode = barcode.Trim();
+        }
+
+        public void ChangeCategory(int categoryId)
+        {
+            if (categoryId <= 0)
+                throw new ArgumentException("Invalid category ID.", nameof(categoryId));
+            CategoryId = categoryId;
+        }
+
+        public void ChangeUnitOfMeasure(UnitOfMeasure unitOfMeasure)
+        {
+            UnitOfMeasure = unitOfMeasure;
+        }
+
         public void ChangePrice(decimal newPrice)
         {
             if (newPrice < 0)

@@ -16,12 +16,23 @@ public sealed class FakeEmployeeRepository : IEmployeeRepository
     public string? DuplicateFieldOnSave { get; set; }
 
     public Task<bool> CodeExistsAsync(string code) => Task.FromResult(Employees.Any(e => e.Code == code));
+    public Task<string> GenerateNextCodeAsync() => Task.FromResult($"EMP-{Employees.Count + 1:D4}");
     public Task<bool> UserNameExistsAsync(string userName) => Task.FromResult(Users.Any(u => u.UserName == userName));
+
+    public Task<Employee?> GetByCodeAsync(string code) =>
+        Task.FromResult(Employees.FirstOrDefault(e => string.Equals(e.Code, code, StringComparison.OrdinalIgnoreCase)));
 
     public Task<IReadOnlyList<BranchOption>> GetActiveBranchesAsync() =>
         Task.FromResult<IReadOnlyList<BranchOption>>(new[] { new BranchOption(1, "MAIN", "Main Branch") });
 
     public Task<bool> BranchIsActiveAsync(int branchId) => Task.FromResult(branchId == 1);
+
+    public Task<IReadOnlyList<DepartmentOption>> GetActiveDepartmentsAsync() =>
+        Task.FromResult<IReadOnlyList<DepartmentOption>>(new[] { new DepartmentOption(1, "Sales") });
+    public Task<bool> DepartmentIsActiveAsync(int departmentId) => Task.FromResult(departmentId == 1);
+    public Task<IReadOnlyList<EmployeeListRow>> ListAsync() =>
+        Task.FromResult<IReadOnlyList<EmployeeListRow>>(Employees.Select(e => new EmployeeListRow(
+            e.Id, e.Code, e.FullName, e.PhotoKey, e.JobTitle, e.DepartmentId, null, "Main Branch", e.HireDate, e.IsActive)).ToList());
 
     public Task<IReadOnlyList<string>> GetActiveRoleNamesAsync() =>
         Task.FromResult<IReadOnlyList<string>>(new[] { "Admin", "Manager", "Accountant", "Cashier" });

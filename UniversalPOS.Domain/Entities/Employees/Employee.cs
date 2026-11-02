@@ -9,52 +9,55 @@ public class Employee
 {
     private Employee() { } // EF Core
 
-    public Employee(string code, string arabicName, string englishName, DateOnly birthDate, string phone,
-        string jobTitle, int branchId, string qualification, string address, DateOnly hireDate)
+    public Employee(string code, string fullName, string phone, string email,
+        string jobTitle, int branchId, DateOnly hireDate, string? photoKey = null, int? departmentId = null)
     {
-        if (string.IsNullOrWhiteSpace(code)) throw new ArgumentException("Employee code is required.", nameof(code));
-        if (string.IsNullOrWhiteSpace(arabicName)) throw new ArgumentException("Arabic name is required.", nameof(arabicName));
-        if (string.IsNullOrWhiteSpace(englishName)) throw new ArgumentException("English name is required.", nameof(englishName));
-        if (string.IsNullOrWhiteSpace(phone)) throw new ArgumentException("Phone is required.", nameof(phone));
-        if (string.IsNullOrWhiteSpace(jobTitle)) throw new ArgumentException("Job title is required.", nameof(jobTitle));
-        if (branchId <= 0) throw new ArgumentOutOfRangeException(nameof(branchId));
-        if (string.IsNullOrWhiteSpace(qualification)) throw new ArgumentException("Qualification is required.", nameof(qualification));
-        if (string.IsNullOrWhiteSpace(address)) throw new ArgumentException("Address is required.", nameof(address));
-        if (birthDate >= hireDate) throw new ArgumentException("Hire date must be after the birth date.", nameof(hireDate));
-
+        Validate(code, fullName, phone, email, jobTitle, branchId);
         Code = code.Trim().ToUpperInvariant();
-        ArabicName = arabicName.Trim();
-        EnglishName = englishName.Trim();
-        BirthDate = birthDate;
+        FullName = fullName.Trim();
         Phone = phone.Trim();
+        Email = email.Trim();
         JobTitle = jobTitle.Trim();
         BranchId = branchId;
-        Qualification = qualification.Trim();
-        Address = address.Trim();
         HireDate = hireDate;
+        PhotoKey = string.IsNullOrWhiteSpace(photoKey) ? null : photoKey.Trim();
+        DepartmentId = departmentId is > 0 ? departmentId : null;
         IsActive = true;
     }
 
     public int Id { get; private set; }
-    /// <summary>Business code typed by the user; unique. Never used as a foreign key.</summary>
+    /// <summary>Business code (generated automatically as EMP-0001, ...); unique. Never used as a foreign key.</summary>
     public string Code { get; private set; } = string.Empty;
-    public string ArabicName { get; private set; } = string.Empty;
-    public string EnglishName { get; private set; } = string.Empty;
-    public DateOnly BirthDate { get; private set; }
+    public string FullName { get; private set; } = string.Empty;
     public string Phone { get; private set; } = string.Empty;
+    public string Email { get; private set; } = string.Empty;
     public string JobTitle { get; private set; } = string.Empty;
     public int BranchId { get; private set; }
-    public string Qualification { get; private set; } = string.Empty;
-    public string Address { get; private set; } = string.Empty;
     public DateOnly HireDate { get; private set; }
+    /// <summary>Relative key of the employee photo file; null when no photo was chosen.</summary>
+    public string? PhotoKey { get; private set; }
+    /// <summary>Optional department; null when the employee is not assigned to one.</summary>
+    public int? DepartmentId { get; private set; }
     public bool IsActive { get; private set; } = true;
 
-    /// <summary>Age is derived, never stored.</summary>
-    public int AgeOn(DateOnly today)
+    public void UpdateDetails(string code, string fullName, string phone, string email,
+        string jobTitle, int branchId, DateOnly hireDate, string? photoKey, int? departmentId = null)
     {
-        int age = today.Year - BirthDate.Year;
-        if (today < BirthDate.AddYears(age)) age--;
-        return age;
+        Validate(code, fullName, phone, email, jobTitle, branchId);
+        Code = code.Trim().ToUpperInvariant(); FullName = fullName.Trim(); Phone = phone.Trim(); Email = email.Trim();
+        JobTitle = jobTitle.Trim(); BranchId = branchId; HireDate = hireDate;
+        PhotoKey = string.IsNullOrWhiteSpace(photoKey) ? null : photoKey.Trim();
+        DepartmentId = departmentId is > 0 ? departmentId : null;
+    }
+
+    private static void Validate(string code, string fullName, string phone, string email, string jobTitle, int branchId)
+    {
+        if (string.IsNullOrWhiteSpace(code)) throw new ArgumentException("Employee code is required.", nameof(code));
+        if (string.IsNullOrWhiteSpace(fullName)) throw new ArgumentException("Full name is required.", nameof(fullName));
+        if (string.IsNullOrWhiteSpace(phone)) throw new ArgumentException("Phone is required.", nameof(phone));
+        if (string.IsNullOrWhiteSpace(email)) throw new ArgumentException("Email is required.", nameof(email));
+        if (string.IsNullOrWhiteSpace(jobTitle)) throw new ArgumentException("Job title is required.", nameof(jobTitle));
+        if (branchId <= 0) throw new ArgumentOutOfRangeException(nameof(branchId));
     }
 
     public void Activate() => IsActive = true;

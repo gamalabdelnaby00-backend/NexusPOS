@@ -1,0 +1,163 @@
+﻿<Window x:Class="UniversalPOS.Desktop.Views.CloseShiftWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="إغلاق الوردية"
+        Width="520"
+        SizeToContent="Height"
+        MinWidth="420"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        Background="#F3F6FC"
+        FontFamily="Segoe UI"
+        Loaded="Window_Loaded">
+
+    <Window.Resources>
+        <Style x:Key="FieldStyle" TargetType="TextBox">
+            <Setter Property="Padding" Value="12,10"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="BorderBrush" Value="#D8E2F0"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="MinHeight" Value="44"/>
+        </Style>
+
+        <Style x:Key="LabelStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="#263B59"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+        </Style>
+
+        <Style x:Key="ButtonStyle" TargetType="Button">
+            <Setter Property="Padding" Value="20,11"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
+    </Window.Resources>
+
+    <Border Margin="18"
+            Padding="26"
+            Background="White"
+            BorderBrush="#E1E9F5"
+            BorderThickness="1"
+            CornerRadius="16">
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- عنوان الشاشة -->
+            <StackPanel Grid.Row="0" Margin="0,0,0,24">
+                <TextBlock x:Name="TitleText"
+                           Text="إغلاق الوردية"
+                           FontSize="23"
+                           FontWeight="Bold"
+                           Foreground="#17345A"/>
+
+                <TextBlock Text="راجع النقدية وسجّل المبلغ الفعلي قبل الإغلاق."
+                           Margin="0,7,0,0"
+                           FontSize="13"
+                           Foreground="#71819A"
+                           TextWrapping="Wrap"/>
+            </StackPanel>
+
+            <!-- النقدية المتوقعة: تظهر حسب الصلاحية -->
+            <Border x:Name="ExpectedCashPanel"
+                    Grid.Row="1"
+                    Padding="16"
+                    Margin="0,0,0,22"
+                    Background="#EDF4FF"
+                    BorderBrush="#D8E7FF"
+                    BorderThickness="1"
+                    CornerRadius="10"
+                    Visibility="Collapsed">
+
+                <StackPanel>
+                    <TextBlock x:Name="ExpectedCashLabel"
+                               Text="النقدية المتوقعة"
+                               FontSize="13"
+                               Foreground="#526B8D"/>
+
+                    <TextBlock x:Name="ExpectedCashText"
+                               Text="—"
+                               Margin="0,7,0,0"
+                               FontSize="25"
+                               FontWeight="Bold"
+                               Foreground="#1768E8"/>
+                </StackPanel>
+            </Border>
+
+            <!-- النقدية الفعلية -->
+            <StackPanel Grid.Row="2" Margin="0,0,0,18">
+                <TextBlock x:Name="CountedCashLabel"
+                           Text="النقدية الفعلية"
+                           Style="{StaticResource LabelStyle}"/>
+
+                <TextBox x:Name="CountedCashInput"
+                         Style="{StaticResource FieldStyle}"
+                         ToolTip="أدخل إجمالي النقدية التي تم عدّها"/>
+            </StackPanel>
+
+            <!-- الملاحظات -->
+            <StackPanel Grid.Row="3" Margin="0,0,0,16">
+                <TextBlock x:Name="NotesLabel"
+                           Text="ملاحظات"
+                           Style="{StaticResource LabelStyle}"/>
+
+                <TextBox x:Name="NotesInput"
+                         Style="{StaticResource FieldStyle}"
+                         Height="90"
+                         VerticalContentAlignment="Top"
+                         TextWrapping="Wrap"
+                         AcceptsReturn="True"
+                         ToolTip="أضف أي ملاحظات تخص إغلاق الوردية"/>
+            </StackPanel>
+
+            <!-- رسائل الأخطاء -->
+            <Border Grid.Row="4"
+                    x:Name="ErrorPanel"
+                    Visibility="Collapsed"
+                    Background="#FFF0F0"
+                    BorderBrush="#FFD5D5"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="11"
+                    Margin="0,0,0,16">
+
+                <TextBlock x:Name="ErrorText"
+                           Foreground="#B42323"
+                           TextWrapping="Wrap"/>
+            </Border>
+
+            <!-- الأزرار -->
+            <StackPanel Grid.Row="5"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Left">
+
+                <Button x:Name="CloseShiftButton"
+                        Content="إغلاق الوردية"
+                        Style="{StaticResource ButtonStyle}"
+                        Background="#1768E8"
+                        Foreground="White"
+                        Click="CloseButton_Click"
+                        Margin="0,0,10,0"/>
+
+                <Button x:Name="CancelButton"
+                        Content="إلغاء"
+                        Style="{StaticResource ButtonStyle}"
+                        Background="#E9EEF6"
+                        Foreground="#29415F"
+                        IsCancel="True"/>
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>

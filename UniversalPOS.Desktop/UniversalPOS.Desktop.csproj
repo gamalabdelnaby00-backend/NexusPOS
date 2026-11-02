@@ -7,6 +7,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <UserSecretsId>5657daf5-a757-491c-a7cb-7eb086f7109a</UserSecretsId>
+    <ApplicationIcon>Assets\Icons\NexusPOS.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,6 +15,9 @@
     <None Remove="Images\Cash.png" />
     <None Remove="Images\EWallet.png" />
     <None Remove="Images\InstaPay.png" />
+    <None Remove="Assets\Icons\NexusPOS.ico" />
+    <None Remove="Assets\Images\nexuspos-emblem.png" />
+    <None Remove="Assets\Images\nexuspos-logo.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -32,6 +36,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Assets\Icons\NexusPOS.ico" />
+    <Resource Include="Assets\Images\nexuspos-emblem.png" />
+    <Resource Include="Assets\Images\nexuspos-logo.png" />
     <Resource Include="Images\Card.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>

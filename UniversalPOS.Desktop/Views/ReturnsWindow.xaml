@@ -1,4 +1,4 @@
-<Window x:Class="UniversalPOS.Desktop.Views.ReturnsWindow"
+﻿<Window x:Class="UniversalPOS.Desktop.Views.ReturnsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="المرتجعات | Returns" Height="760" Width="1180" MinHeight="650" MinWidth="950"
@@ -16,7 +16,7 @@
                 <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="180"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
                 <TextBlock Text="رقم الفاتورة" VerticalAlignment="Center" FontWeight="SemiBold" Margin="0,0,12,0"/>
                 <TextBox x:Name="SaleIdBox" Grid.Column="1" Height="36" Padding="8,5" VerticalContentAlignment="Center"/>
-                <Button Grid.Column="2" Content="بحث عن الفاتورة" Click="SearchSale_Click" Background="#2457C5" Foreground="White" BorderThickness="0" Padding="18,7" Margin="10,0" FontWeight="SemiBold"/>
+                <Button x:Name="SearchSaleButton" Grid.Column="2" Content="بحث عن الفاتورة" Click="SearchSale_Click" Background="#2457C5" Foreground="White" BorderThickness="0" Padding="18,7" Margin="10,0" FontWeight="SemiBold"/>
                 <TextBlock x:Name="SaleSummaryText" Grid.Column="3" Text="أدخل رقم الفاتورة للبدء" VerticalAlignment="Center" Foreground="#52647A" Margin="12,0,0,0"/>
             </Grid>
         </Border>
@@ -40,7 +40,7 @@
                 <StackPanel Margin="0,0,12,0"><TextBlock Text="سبب الإرجاع *" FontWeight="SemiBold" Margin="0,0,0,5"/><TextBox x:Name="ReasonBox" Height="36" Padding="8,5" VerticalContentAlignment="Center"/></StackPanel>
                 <StackPanel Grid.Column="1" Margin="0,0,12,0"><TextBlock Text="طريقة رد المبلغ" FontWeight="SemiBold" Margin="0,0,0,5"/><ComboBox x:Name="RefundMethodBox" Height="36" Padding="6"/></StackPanel>
                 <StackPanel Grid.Column="2" Margin="0,0,12,0"><TextBlock Text="مرجع العملية (اختياري)" FontWeight="SemiBold" Margin="0,0,0,5"/><TextBox x:Name="ReferenceBox" Height="36" Padding="8,5" VerticalContentAlignment="Center"/><TextBlock x:Name="TotalText" Text="إجمالي المرتجع: 0.00" FontSize="16" FontWeight="Bold" Foreground="#2457C5" Margin="0,7,0,0"/></StackPanel>
-                <Button Grid.Column="3" Content="تأكيد المرتجع" Click="ProcessReturn_Click" Background="#16845B" Foreground="White" BorderThickness="0" Padding="22,12" FontWeight="Bold" VerticalAlignment="Center" MinWidth="135"/>
+                <Button x:Name="ProcessReturnButton" Grid.Column="3" Content="تأكيد المرتجع" Click="ProcessReturn_Click" Background="#16845B" Foreground="White" BorderThickness="0" Padding="22,12" FontWeight="Bold" VerticalAlignment="Center" MinWidth="135"/>
             </Grid>
         </Border>
     </Grid>

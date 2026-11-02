@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+using System;
 
 namespace UniversalPOS.Domain.Entities
 {
@@ -11,22 +9,27 @@ namespace UniversalPOS.Domain.Entities
         public bool IsActive { get; private set; }
         /// <summary>Optional business code shown to users; unique when present.</summary>
         public string? Code { get; private set; }
+
         public Category(string name, string? code = null)
         {
-            if (string.IsNullOrWhiteSpace(name))
-                throw new ArgumentException("Category name cannot be empty.");
-            Name = name;
-            Code = string.IsNullOrWhiteSpace(code) ? null : code.Trim();
+            UpdateDetails(name, code);
             IsActive = true;
-        }
-        public void Deactivate()
-        {
-            IsActive = false;
         }
 
-        public void Activate()
+        public void UpdateDetails(string name, string? code = null)
         {
-            IsActive = true;
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentException("Category name cannot be empty.", nameof(name));
+            if (name.Trim().Length > 200)
+                throw new ArgumentException("Category name cannot exceed 200 characters.", nameof(name));
+            if (!string.IsNullOrWhiteSpace(code) && code.Trim().Length > 50)
+                throw new ArgumentException("Category code cannot exceed 50 characters.", nameof(code));
+
+            Name = name.Trim();
+            Code = string.IsNullOrWhiteSpace(code) ? null : code.Trim();
         }
+
+        public void Deactivate() => IsActive = false;
+        public void Activate() => IsActive = true;
     }
 }

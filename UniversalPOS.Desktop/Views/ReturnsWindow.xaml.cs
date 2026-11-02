@@ -39,17 +39,23 @@ public partial class ReturnsWindow : Window
 
     private async void SearchSale_Click(object sender, RoutedEventArgs e)
     {
+        // Clear the previous selection first so a failed search cannot leave an old sale returnable.
+        _sale = null;
+        _rows.Clear();
+        SaleSummaryText.Text = "أدخل رقم الفاتورة للبدء";
+        UpdateTotal();
+
         if (!int.TryParse(SaleIdBox.Text.Trim(), out var saleId) || saleId <= 0)
         {
             MessageBox.Show("اكتب رقم فاتورة صحيح.", "بيانات غير صحيحة", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 
+        SearchSaleButton.IsEnabled = false;
         try
         {
             ItemsGrid.CommitEdit(); ItemsGrid.CommitEdit();
             _sale = await _sales.GetByIdAsync(saleId);
-            _rows.Clear();
             if (_sale is null)
             {
                 SaleSummaryText.Text = "لم يتم العثور على الفاتورة.";
@@ -78,7 +84,15 @@ public partial class ReturnsWindow : Window
         }
         catch (Exception ex)
         {
+            _sale = null;
+            _rows.Clear();
+            UpdateTotal();
+            SaleSummaryText.Text = "تعذر تحميل الفاتورة.";
             MessageBox.Show(ex.Message, "تعذر البحث عن الفاتورة", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+        finally
+        {
+            SearchSaleButton.IsEnabled = true;
         }
     }
 
@@ -102,6 +116,7 @@ public partial class ReturnsWindow : Window
             return;
         }
         if (RefundMethodBox.SelectedItem is not PaymentMethod method) return;
+        ProcessReturnButton.IsEnabled = false;
         try
         {
             var requests = selected.Select(r => new SaleReturnItemRequest(r.SaleItemId, r.ReturnQuantity, r.IsRestockable)).ToArray();
@@ -112,6 +127,10 @@ public partial class ReturnsWindow : Window
         catch (Exception ex)
         {
             MessageBox.Show(ex.Message, "تعذر تسجيل المرتجع", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+        finally
+        {
+            ProcessReturnButton.IsEnabled = true;
         }
     }
 

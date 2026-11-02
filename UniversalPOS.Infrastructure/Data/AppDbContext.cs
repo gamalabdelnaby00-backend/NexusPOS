@@ -48,6 +48,7 @@ public class AppDbContext : DbContext
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
     public DbSet<Branch> Branches => Set<Branch>();
     public DbSet<Employee> Employees => Set<Employee>();
+    public DbSet<Department> Departments => Set<Department>();
     public DbSet<SystemSetting> SystemSettings => Set<SystemSetting>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -215,15 +216,21 @@ public class AppDbContext : DbContext
             e.HasKey(x => x.Id);
             e.Property(x => x.Code).HasMaxLength(50).IsRequired();
             e.HasIndex(x => x.Code).IsUnique();
-            e.Property(x => x.ArabicName).HasMaxLength(200).IsRequired();
-            e.Property(x => x.EnglishName).HasMaxLength(200).IsRequired();
+            e.Property(x => x.FullName).HasMaxLength(200).IsRequired();
             e.Property(x => x.Phone).HasMaxLength(30).IsRequired();
+            e.Property(x => x.Email).HasMaxLength(200).IsRequired();
             e.Property(x => x.JobTitle).HasMaxLength(100).IsRequired();
-            e.Property(x => x.Qualification).HasMaxLength(200).IsRequired();
-            e.Property(x => x.Address).HasMaxLength(500).IsRequired();
-            e.Property(x => x.BirthDate).HasColumnType("date");
+            e.Property(x => x.PhotoKey).HasMaxLength(300);
             e.Property(x => x.HireDate).HasColumnType("date");
             e.HasOne<Branch>().WithMany().HasForeignKey(x => x.BranchId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne<Department>().WithMany().HasForeignKey(x => x.DepartmentId).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<Department>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Name).HasMaxLength(100).IsRequired();
+            e.HasIndex(x => x.Name).IsUnique();
         });
 
         // One login account per employee at most.

@@ -1,4 +1,4 @@
-﻿using UniversalPOS.Domain.Enums;
+using UniversalPOS.Domain.Enums;
 
 namespace UniversalPOS.Domain.Entities;
 public class CashShift 
@@ -19,14 +19,29 @@ public class CashShift
     {
         if(userId<=0||terminalId<=0)
             throw new ArgumentOutOfRangeException("User and terminal IDs must be positive.");
-        if(openingFloat<0)
-            throw new ArgumentOutOfRangeException(nameof(openingFloat));UserId=userId;TerminalId=terminalId;OpeningFloat=openingFloat;OpenedAtUtc=DateTime.UtcNow;Status=CashShiftStatus.Open;
+        if (openingFloat < 0m || decimal.Round(openingFloat, 2) != openingFloat)
+            throw new ArgumentOutOfRangeException(nameof(openingFloat), "Opening float must be non-negative and have at most two decimal places.");
+
+        UserId = userId;
+        TerminalId = terminalId;
+        OpeningFloat = openingFloat;
+        OpenedAtUtc = DateTime.UtcNow;
+        Status = CashShiftStatus.Open;
     } public void RequestClose(decimal expectedCash,decimal countedCash,string? notes=null)
     {
         if(Status!=CashShiftStatus.Open)
             throw new InvalidOperationException("Only open shifts can be closed.");
-        if(expectedCash<0||countedCash<0)
-            throw new ArgumentOutOfRangeException("Cash values cannot be negative.");ExpectedCash=expectedCash;CountedCash=countedCash;Difference=countedCash-expectedCash;CloseNotes=notes?.Trim();ClosedAtUtc=DateTime.UtcNow;Status=Difference==0?CashShiftStatus.Closed:CashShiftStatus.PendingApproval;
+        if (expectedCash < 0m || countedCash < 0m ||
+            decimal.Round(expectedCash, 2) != expectedCash ||
+            decimal.Round(countedCash, 2) != countedCash)
+            throw new ArgumentOutOfRangeException(nameof(countedCash), "Cash values must be non-negative and have at most two decimal places.");
+
+        ExpectedCash = expectedCash;
+        CountedCash = countedCash;
+        Difference = countedCash - expectedCash;
+        CloseNotes = notes?.Trim();
+        ClosedAtUtc = DateTime.UtcNow;
+        Status = Difference == 0m ? CashShiftStatus.Closed : CashShiftStatus.PendingApproval;
     } public void ApproveDifference(int approverUserId)
     {
         if(Status!=CashShiftStatus.PendingApproval)

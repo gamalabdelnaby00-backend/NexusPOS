@@ -104,6 +104,14 @@ public class InitialDataSeeder
             await _db.SaveChangesAsync();
         }
 
+        // Default departments for the employees screen; more can be added later.
+        if (!await _db.Departments.AnyAsync())
+        {
+            foreach (var name in new[] { "مبيعات", "محاسبة", "صيدلية", "مخازن", "موارد بشرية", "تقنية المعلومات" })
+                _db.Departments.Add(new Department(name));
+            await _db.SaveChangesAsync();
+        }
+
         var terminal = await _db.PosTerminals
             .SingleOrDefaultAsync(t => t.Code == "POS-01");
 

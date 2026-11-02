@@ -20,6 +20,35 @@ public sealed class EmployeeRepository : IEmployeeRepository
     public Task<bool> CodeExistsAsync(string code) =>
         _db.Employees.AsNoTracking().AnyAsync(e => e.Code == code);
 
+    public async Task<IReadOnlyList<DepartmentOption>> GetActiveDepartmentsAsync() =>
+        await _db.Departments.AsNoTracking().Where(d => d.IsActive).OrderBy(d => d.Name)
+            .Select(d => new DepartmentOption(d.Id, d.Name)).ToListAsync();
+
+    public Task<bool> DepartmentIsActiveAsync(int departmentId) =>
+        _db.Departments.AsNoTracking().AnyAsync(d => d.Id == departmentId && d.IsActive);
+
+    public async Task<IReadOnlyList<EmployeeListRow>> ListAsync()
+    {
+        var rows = await (from e in _db.Employees.AsNoTracking()
+                          join b in _db.Branches.AsNoTracking() on e.BranchId equals b.Id
+                          join d in _db.Departments.AsNoTracking() on e.DepartmentId equals d.Id into departments
+                          from d in departments.DefaultIfEmpty()
+                          orderby e.Code
+                          select new { e.Id, e.Code, e.FullName, e.PhotoKey, e.JobTitle, e.DepartmentId,
+                                       DepartmentName = d == null ? null : d.Name, BranchName = b.Name, e.HireDate, e.IsActive }).ToListAsync();
+        return rows.Select(r => new EmployeeListRow(r.Id, r.Code, r.FullName, r.PhotoKey, r.JobTitle,
+            r.DepartmentId, r.DepartmentName, r.BranchName, r.HireDate, r.IsActive)).ToList();
+    }
+
+    public async Task<string> GenerateNextCodeAsync()
+    {
+        var codes = await _db.Employees.AsNoTracking().Where(e => e.Code.StartsWith("EMP-")).Select(e => e.Code).ToListAsync();
+        int max = 0;
+        foreach (var c in codes)
+            if (int.TryParse(c.AsSpan(4), out int n) && n > max) max = n;
+        return $"EMP-{max + 1:D4}";
+    }
+
     public Task<bool> UserNameExistsAsync(string userName) =>
         _db.Users.AsNoTracking().AnyAsync(u => u.UserName == userName);
 
@@ -39,6 +68,8 @@ public sealed class EmployeeRepository : IEmployeeRepository
             .Select(r => (int?)r.Id).FirstOrDefaultAsync();
         return id;
     }
+
+    public Task<Employee?> GetByCodeAsync(string code) => _db.Employees.FirstOrDefaultAsync(e => e.Code == code);
 
     public async Task AddAsync(Employee employee) => await _db.Employees.AddAsync(employee);
 
@@ -77,19 +108,19 @@ public sealed class EmployeeRepository : IEmployeeRepository
         foreach (var e in employees)
         {
             var user = users.FirstOrDefault(u => u.EmployeeId == e.Id);
-            rows.Add(new EmployeeAccountRow(e.Code, e.ArabicName, e.EnglishName, user?.UserName, e.JobTitle,
-                branches.GetValueOrDefault(e.BranchId), e.HireDate, user?.IsActive, user is null ? string.Empty : RolesOf(user)));
+            rows.Add(new EmployeeAccountRow(e.Code, e.FullName, user?.UserName, e.JobTitle,
+                branches.GetValueOrDefault(e.BranchId), e.HireDate, user?.IsActive, user is null ? string.Empty : RolesOf(user), e.IsActive, e.Phone));
         }
 
         // Accounts that have no employee record (e.g. the initial Admin).
         foreach (var u in users.Where(u => u.EmployeeId is null))
-            rows.Add(new EmployeeAccountRow("-", u.DisplayName, u.DisplayName, u.UserName, null, null, null, u.IsActive, RolesOf(u)));
+            rows.Add(new EmployeeAccountRow("-", u.DisplayName, u.UserName, null, null, null, u.IsActive, RolesOf(u), false, string.Empty));
 
         if (!string.IsNullOrWhiteSpace(text))
         {
             string q = text.Trim();
             bool Hit(string? v) => v is not null && v.Contains(q, StringComparison.OrdinalIgnoreCase);
-            rows = rows.Where(r => Hit(r.EmployeeCode) || Hit(r.ArabicName) || Hit(r.EnglishName) || Hit(r.UserName) ||
+            rows = rows.Where(r => Hit(r.EmployeeCode) || Hit(r.FullName) ||
                                    Hit(r.BranchName) || Hit(r.JobTitle) ||
                                    (r.JobTitle is not null && (Hit(JobTitles.Display(r.JobTitle, true)) || Hit(JobTitles.Display(r.JobTitle, false)))))
                 .ToList();

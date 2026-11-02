@@ -1,5 +1,6 @@
 ﻿
 using Microsoft.EntityFrameworkCore;
+using System.Data;
 using UniversalPOS.Application.Abstractions;
 using UniversalPOS.Infrastructure.Data;
 
@@ -19,7 +20,9 @@ public class UnitOfWork : IUnitOfWork
         ArgumentNullException.ThrowIfNull(operation);
 
         await using var transaction =
-            await _dbContext.Database.BeginTransactionAsync();
+            // Serializable isolation protects read-then-write workflows (such as sale returns)
+            // from two concurrent requests both passing the remaining-quantity/refund checks.
+            await _dbContext.Database.BeginTransactionAsync(IsolationLevel.Serializable);
 
         try
         {

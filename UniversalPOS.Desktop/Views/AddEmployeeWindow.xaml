@@ -1,0 +1,214 @@
+﻿<Window x:Class="UniversalPOS.Desktop.Views.AddEmployeeWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="إضافة موظف | NexusPOS" Width="1100" Height="640"
+        MinWidth="900" MinHeight="600" WindowStartupLocation="CenterOwner"
+        Background="#F3F7FC" FontFamily="Segoe UI"
+        FlowDirection="RightToLeft">
+    <Window.Resources>
+        <SolidColorBrush x:Key="Navy" Color="#08274C"/>
+        <SolidColorBrush x:Key="Blue" Color="#0075F5"/>
+        <SolidColorBrush x:Key="Border" Color="#C9DCF2"/>
+        <SolidColorBrush x:Key="ErrorBrush" Color="Firebrick"/>
+
+        <Style TargetType="TextBox">
+            <Setter Property="MinHeight" Value="44"/>
+            <Setter Property="Padding" Value="12,7"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="BorderBrush" Value="{StaticResource Border}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+        <Style TargetType="ComboBox">
+            <Setter Property="MinHeight" Value="44"/>
+            <Setter Property="Padding" Value="10,6"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="BorderBrush" Value="{StaticResource Border}"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+        <Style TargetType="DatePicker">
+            <Setter Property="MinHeight" Value="44"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="BorderBrush" Value="{StaticResource Border}"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+
+        <Style x:Key="FieldLabel" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{StaticResource Navy}"/>
+            <Setter Property="Margin" Value="0,0,0,7"/>
+        </Style>
+        <Style x:Key="FieldLabelNext" TargetType="TextBlock" BasedOn="{StaticResource FieldLabel}">
+            <Setter Property="Margin" Value="0,18,0,7"/>
+        </Style>
+        <Style x:Key="FieldError" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="Firebrick"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="Visibility" Value="Collapsed"/>
+            <Setter Property="Margin" Value="0,3,0,0"/>
+        </Style>
+        <Style x:Key="Hint" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#7C8DA6"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="IsHitTestVisible" Value="False"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="14,0"/>
+        </Style>
+
+        <Style x:Key="Card" TargetType="Border">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Padding" Value="22"/>
+            <Setter Property="BorderBrush" Value="#D6E6F8"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+        <Style x:Key="SectionTitle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="{StaticResource Navy}"/>
+            <Setter Property="Margin" Value="0,0,0,4"/>
+        </Style>
+
+        <Style x:Key="RoundedButton" TargetType="Button">
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" CornerRadius="8" Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Opacity" Value="0.88"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Bd" Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <Grid Margin="24">
+            <StackPanel>
+                <!-- Header -->
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,18">
+                    <Path Data="{StaticResource Icon.PersonAdd}" Fill="#0B4FB3" Width="30" Height="30" Stretch="Uniform" VerticalAlignment="Center"/>
+                    <TextBlock x:Name="HeaderTitle" Text="إضافة موظف جديد" FontSize="25" FontWeight="Bold"
+                               Foreground="#0B4FB3" Margin="12,0,0,0" VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <Border x:Name="Banner" Background="#FDECEA" BorderBrush="Firebrick" BorderThickness="1" CornerRadius="7" Padding="10" Margin="0,0,0,16" Visibility="Collapsed">
+                    <TextBlock x:Name="BannerText" Foreground="Firebrick" TextWrapping="Wrap" FontWeight="SemiBold"/>
+                </Border>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="20"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Right card (RTL): basic data -->
+                    <Border Grid.Column="0" Style="{StaticResource Card}" VerticalAlignment="Top">
+                        <StackPanel>
+                            <TextBlock x:Name="BasicTitle" Text="البيانات الأساسية" Style="{StaticResource SectionTitle}"/>
+                            <Border Height="1" Background="#E7EDF6" Margin="0,8,0,18"/>
+
+                            <TextBlock x:Name="FullNameLabel" Text="الاسم الكامل *" Style="{StaticResource FieldLabel}"/>
+                            <Grid>
+                                <TextBox x:Name="FullNameTextBox"/>
+                                <TextBlock x:Name="FullNameHint" Style="{StaticResource Hint}"/>
+                            </Grid>
+                            <TextBlock x:Name="FullNameError" Style="{StaticResource FieldError}"/>
+
+                            <TextBlock x:Name="PhoneLabel" Text="رقم الهاتف *" Style="{StaticResource FieldLabelNext}"/>
+                            <Grid>
+                                <TextBox x:Name="PhoneTextBox" FlowDirection="LeftToRight"/>
+                                <TextBlock x:Name="PhoneHint" Style="{StaticResource Hint}"/>
+                            </Grid>
+                            <TextBlock x:Name="PhoneError" Style="{StaticResource FieldError}"/>
+
+                            <TextBlock x:Name="EmailLabel" Text="البريد الإلكتروني *" Style="{StaticResource FieldLabelNext}"/>
+                            <Grid>
+                                <TextBox x:Name="EmailTextBox" FlowDirection="LeftToRight"/>
+                                <TextBlock x:Name="EmailHint" Style="{StaticResource Hint}"/>
+                            </Grid>
+                            <TextBlock x:Name="EmailError" Style="{StaticResource FieldError}"/>
+
+                            <!-- Permissions are granted from the Roles screen, not here. -->
+                            <Border Background="#EEF5FF" BorderBrush="#D2E2F5" BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,22,0,0">
+                                <TextBlock x:Name="PermissionsNote" TextWrapping="Wrap" FontSize="12" Foreground="#3B5877"/>
+                            </Border>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Left card (RTL): additional data -->
+                    <Border Grid.Column="2" Style="{StaticResource Card}" VerticalAlignment="Top">
+                        <StackPanel>
+                            <TextBlock x:Name="ExtraTitle" Text="بيانات إضافية" Style="{StaticResource SectionTitle}"/>
+                            <Border Height="1" Background="#E7EDF6" Margin="0,8,0,18"/>
+
+                            <TextBlock x:Name="JobLabel" Text="الوظيفة *" Style="{StaticResource FieldLabel}"/>
+                            <Grid>
+                                <ComboBox x:Name="JobComboBox" DisplayMemberPath="Text" SelectedValuePath="Key"/>
+                                <TextBlock x:Name="JobHint" Style="{StaticResource Hint}" Margin="14,0,34,0"/>
+                            </Grid>
+                            <TextBlock x:Name="JobError" Style="{StaticResource FieldError}"/>
+
+                            <TextBlock x:Name="BranchLabel" Text="الفرع *" Style="{StaticResource FieldLabelNext}"/>
+                            <Grid>
+                                <ComboBox x:Name="BranchComboBox" DisplayMemberPath="Name" SelectedValuePath="Id"/>
+                                <TextBlock x:Name="BranchHint" Style="{StaticResource Hint}" Margin="14,0,34,0"/>
+                            </Grid>
+                            <TextBlock x:Name="BranchError" Style="{StaticResource FieldError}"/>
+
+                            <TextBlock x:Name="HireDateLabel" Text="تاريخ التعيين *" Style="{StaticResource FieldLabelNext}"/>
+                            <DatePicker x:Name="HireDatePicker"/>
+                            <TextBlock x:Name="HireDateError" Style="{StaticResource FieldError}"/>
+
+                            <TextBlock x:Name="DepartmentLabel" Text="القسم" Style="{StaticResource FieldLabelNext}"/>
+                            <ComboBox x:Name="DepartmentComboBox" DisplayMemberPath="Name" SelectedValuePath="Id"/>
+                            <TextBlock x:Name="DepartmentError" Style="{StaticResource FieldError}"/>
+
+                            <TextBlock x:Name="PhotoLabel" Text="الصورة الشخصية" Style="{StaticResource FieldLabelNext}"/>
+                            <StackPanel Orientation="Horizontal">
+                                <Border Width="130" Height="86" CornerRadius="8" Background="#EEF5FF" BorderBrush="#D2E2F5" BorderThickness="1" ClipToBounds="True">
+                                    <Grid>
+                                        <Path x:Name="PhotoPlaceholder" Data="{StaticResource Icon.Camera}" Fill="#3F5F8A" Width="34" Height="34"
+                                              Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        <Image x:Name="PhotoImage" Stretch="UniformToFill"/>
+                                    </Grid>
+                                </Border>
+                                <StackPanel VerticalAlignment="Center" Margin="14,0,0,0">
+                                    <Button x:Name="PhotoButton" Style="{StaticResource RoundedButton}"
+                                            Padding="20,11" Background="#6B84A3" Foreground="White" BorderBrush="#6B84A3"/>
+                                    <TextBlock x:Name="PhotoError" Style="{StaticResource FieldError}"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <!-- Actions: in RTL the first child sits on the right, so Cancel comes first and Save ends up on its left. -->
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,20,0,0">
+                    <Button x:Name="CancelButton" Style="{StaticResource RoundedButton}"
+                            MinWidth="130" Padding="20,11" Background="#F2F7FD" Foreground="#08274C" BorderBrush="#D2E2F5" IsCancel="True"/>
+                    <Button x:Name="SaveButton" Style="{StaticResource RoundedButton}"
+                            MinWidth="170" Padding="20,11" Margin="10,0,0,0" Background="#0075F5" Foreground="White" BorderBrush="#0075F5" IsDefault="True"/>
+                </StackPanel>
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
+</Window>

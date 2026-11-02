@@ -231,6 +231,39 @@ public sealed class ProcessSaleReturnServiceTests
         Assert.Empty(_returns.Returns);
     }
 
+
+    [Fact]
+    public async Task ProcessReturn_WithBlankReason_ShouldThrowBeforeWritingAnything()
+    {
+        SignIn();
+        CreateCompletedSale();
+
+        await Assert.ThrowsAsync<ArgumentException>(() =>
+            ExecuteAsync(new[] { CreateRequest() }, reason: "  "));
+
+        Assert.Empty(_returns.Returns);
+        Assert.Empty(_returns.Payments);
+        Assert.Empty(_returns.CashMovements);
+    }
+
+    [Fact]
+    public async Task ProcessReturn_WithExternalReferenceLongerThan200Characters_ShouldThrow()
+    {
+        SignIn();
+        CreateCompletedSale();
+
+        await Assert.ThrowsAsync<ArgumentException>(() =>
+            CreateService().ExecuteAsync(
+                SaleId,
+                "Customer return",
+                new[] { CreateRequest() },
+                PaymentMethod.Card,
+                new string('X', 201)));
+
+        Assert.Empty(_returns.Returns);
+        Assert.Empty(_returns.Payments);
+    }
+
     // 15. Return quantity must use at most three decimal places.
     [Fact]
     public async Task ProcessReturn_WithTooManyQuantityDecimals_ShouldThrow()

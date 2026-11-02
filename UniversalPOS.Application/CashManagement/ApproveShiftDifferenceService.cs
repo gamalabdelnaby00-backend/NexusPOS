@@ -33,6 +33,8 @@ public sealed class ApproveShiftDifferenceService
     {
         if (!_session.IsAuthenticated || _session.UserId is null)
             throw new InvalidOperationException("A signed-in user is required.");
+        if (shiftId <= 0)
+            throw new ArgumentOutOfRangeException(nameof(shiftId));
 
         _permissions.DemandPermission(PermissionCodes.Shifts.ApproveDifference);
         int approverId = _session.UserId.Value;

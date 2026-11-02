@@ -1,4 +1,4 @@
-﻿using UniversalPOS.Application.Authentication;
+using UniversalPOS.Application.Authentication;
 using UniversalPOS.Application.CashManagement;
 using UniversalPOS.Application.Common;
 using UniversalPOS.Application.Sales;
@@ -323,6 +323,31 @@ public class ShiftLifecycleTests
         var shift = shifts.Seed(new CashShift(CashierId, TerminalId, 100m));
         shift.RequestClose(100m, 80m);
         return shift;
+    }
+
+
+    [Fact]
+    public void CashShift_RejectsOpeningFloatWithMoreThanTwoDecimalPlaces()
+    {
+        Assert.Throws<ArgumentOutOfRangeException>(() => new CashShift(CashierId, TerminalId, 10.999m));
+    }
+
+    [Fact]
+    public void CashShift_RejectsCloseAmountsWithMoreThanTwoDecimalPlaces()
+    {
+        var shift = new CashShift(CashierId, TerminalId, 10m);
+
+        Assert.Throws<ArgumentOutOfRangeException>(() => shift.RequestClose(10.001m, 10m));
+        Assert.Equal(CashShiftStatus.Open, shift.Status);
+    }
+
+    [Fact]
+    public async Task ApproveDifference_InvalidShiftId_IsRejectedBeforeTransaction()
+    {
+        var shifts = new FakeCashShiftRepository();
+        var manager = SignedIn(ManagerId, new[] { "Manager" }, new[] { "Shifts.ApproveDifference" });
+
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => ApproveService(shifts, manager).ExecuteAsync(0));
     }
 
     [Fact]
